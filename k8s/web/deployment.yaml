@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies
+spec:
+  selector:
+    matchLabels:
+      app: movies
+  template:
+    metadata:
+      labels:
+        app: movies
+    spec:
+      containers:
+        - name: movies
+          image: jrdckrhub/rotten-potatoes:0.0.1
+          ports:
+            - containerPort: 5000            #A mesma que foi exposta no Dockerfile para gerar a imagem
+          env:
+            - name: MONGODB_DB               ## Essas estão no código app.py
+              value: admin
+            - name: MONGODB_HOST
+              value: mongo-service            ## subst. localhost que está no service.yaml
+            - name: MONGODB_PORT
+              value: "27017"
+            - name: MONGODB_USERNAME
+              value: mongouser
+            - name: MONGODB_PASSWORD
+              value: mongopwd
+
+---                                       ## ou separado service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: movies-service
+spec:
+  selector:
+      app: movies
+  ports: 
+    - port: 80               # Porta do serviço de web <porta exposta>        Ex: 80:5000
+      targetPort: 5000       # porta do container que ele vai apontar  (Container Port)  #Sevice NodePort
+  type: NodePort
+
